@@ -251,3 +251,5 @@ test6<-rbind(test5,saturdays_sub)
 st<-test6[order(test6$Index),]
 # rename column names
 setnames(st,old = c("Index","Index.1","data3","Wday"),new = c("Id","Date Time","Value","Day"))
+
+write.csv(st,"interpolated.csv")
