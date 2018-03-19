@@ -43,149 +43,15 @@ getwd()
 
 data <- read.csv("data.csv")
 
-#why histogram doesnot show 17.840 ?
-summary(data$value)
-hist(data$value)
-hist(data$value, breaks=12, col="red") 
-boxplot(data$value)
-
-d <- density(data$value) # returns the density data
-plot(d) # plots the results 
-polygon(d, col="red", border="blue") 
-
-#
-month<-subset(data,data$Year=="2016")
-ggplot(data,aes(y = value, x = Date)) + geom_point(aes(color = Month))
-
-
-
-
-
-#date column
-my_data4 <- unite(data,col = "Date",Day, Month,Year,sep = "/")
-write.table(my_data4$Date, file = "dateonly.csv",row.names=FALSE, na="",col.names=FALSE)
-
-#date&time column
-data8 <- with(data, as.POSIXct(paste(Date, Hour), format="%d/%m/%Y %H:%M"))
-write.table(data8, file = "data25.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
-
-
-rdate<-as.Date(data$Date,"%d/%m/%y")
-plot(data$value~rdate,type="l",col="red",axes="F")
-box()
-axis(1,rdate,format(rdate,"%m/%y"))
-
-timeDate <- as.POSIXct(data$DateTime, format="%d/%m/%Y  %H:%M")   
-
-temp<-subset(data ,data$Year=="2016" &data$Month=="8")
-p<-ts(data$value,start=c(2016,8,14),end=c(2016,8,15),frequency=24*4)
-#fix(p)
-autoplot(p)
-
-
-
-
-
-dts <- data$Date[1]
-dts
-# [1] 02/27/92 02/27/92 01/14/92 02/28/92 02/01/92
-tms <- data$Hour[1]
-tms
-# [1] 23:03:20 22:29:56 01:03:30 18:21:03 16:56:26
-x <- chron(dates = dts, times = tms, format = c(dates = "d/m/y", times = "h:m:s"))
-x
-x <- chron(dates = dts, times = tms, format = c(dates = "d/m/y", times = "h:m:s"))
-
-plot(data$value~x,type="l",col="red",axes="F")
-
-Lines<-read.csv("data2.csv")
-
-
-
-
-test <- subset(data ,data$Year=="2017")
-
-timeDate <- as.POSIXct(test$DateTime, format="%m/%d/%Y  %H:%M")   
-
-mydata <- data.frame(value=test$value,timestamps=timeDate)
-mydata1 <- xts(mydata$value, order.by=mydata$timestamps)
-
-rdate<-as.Date(data$Date,"%d/%m/%y")
-ax <- as.POSIXct(test$DateTime, format="%m/%d")
-plot(as.ts(mydata1)) # Decompose after conversion to ts
-#axis(1,at=ax,labels=format(ax,"%m/%d/%Y"))
-axis(1,rdate,format(rdate,"%y"))
-
-data1<-subset(data ,data$Year=="2016" &(data$Month=="12" |data$Month=="11"))#&data$Day=="1")
-data1<-subset(data ,data$Year=="2016" &data$Month=="12" & data$Day=="1")#&data$Day=="1")
-
-timeDate <- as.POSIXct(data1$DateTime, format="%m/%d/%Y  %H:%M")   
-mydata <- data.frame(value=data1$value, timestamps=timeDate)
-mydata <- xts(mydata$value, order.by=mydata$timestamps)
-
-attr(mydata, 'frequency') <- 24*4  # Set the frequency of the xts object to weekly
-periodicity(mydata)             # check periodicity: weekly 
-plot(decompose(as.ts(mydata)))  # Decompose after conversion to ts
-try<-stl(mydata, "periodic")
-plot(try)
-adf.test(data$value)
-
-
-
-
-
-Day1<-subset(data ,data$Year=="2016" &data$Month=="12")#&data$Day=="1")
-
-timeDate <- as.POSIXct(Day1$DateTime, format="%m/%d/%Y  %H:%M")
-
-ax <- as.POSIXct(Day1$DateTime, format="%m/%d/%Y")
-
-
-#Days
-Day1$value
-plot(Day1$value~timeDate,type="l",col="red",axes="F")
-axis(1,at=ax,labels=format(ax,"%d"))
-
-par(new=TRUE)
-plot(Day2$value~timeDate1,type="l",col="black",axes="F")
-par(new=TRUE)
-plot(Day3$value~timeDate2,type="l",col="blue",axes="F")
-
-
-
-
-
-
-
-
-Year<-subset(data ,data$Year=="2016" )
-Year1<-subset(data ,data$Year=="2017" )
-Year2<-subset(data ,data$Year=="2018" )
-
-timeDateY <- as.POSIXct(Year$DateTime, format="%m/%d/%Y  %H:%M")
-timeDateY1 <- as.POSIXct(Year1$DateTime, format="%m/%d/%Y  %H:%M")
-timeDateY2 <- as.POSIXct(Year2$DateTime, format="%m/%d/%Y  %H:%M")
-
-
-plot(Year1$value~timeDateY1,type="l",col="red",axes="F")
-axis(1,at=timeDateY1,labels=format(timeDateY1,"%m"))
-
-par(new=TRUE)
-plot(Year1$value~timeDateY1,type="l",col="black",axes="F",add=TRUE)
-par(new=TRUE)
-plot(Year2$value~timeDateY2,type="l",col="blue",axes="F",add=TRUE)
-
-acf(data$value)
-pacf(data$value)
-
 # select columns for day, throughput value and Date Time 
-interpolation_window <- subset(data, select=c("Wday","value", "DateTime"))
+interpolation_window <- subset(data, select=c("Wday","value", "DateTime","Day","Year","Month"))
 # save date time values as POSIX variable
 times.init <-as.POSIXct(strptime(interpolation_window[,3], '%m/%d/%Y  %H:%M'))
 # put date time object aside Throuhput value in zoo object
 data2 <-zoo(interpolation_window[,2],times.init)
+
 # merge the previous series with missing values
-data3 <-merge(data2, zoo(,seq(min(times.init), max(times.init), by = "15 mins")))
+data3 <-merge(data2, zoo(,seq(min(times.init),as.POSIXct("2018-01-09 23:45:00") , by = "15 mins")))
 # converts zoo object to dataframe
 data3<-fortify.zoo(data3)
 # array to map dates to corresponding days
@@ -199,6 +65,7 @@ data8<- merge(zoo(data3),zoo(data7))
 # converts zoo object to dataframe
 data8<-fortify.zoo(data8)
 
+colnames(data8)<- c("index","datetime","value","Wday")
 #select certain days from the whole dataset
 sundays_sub<- subset(data8,Wday == "Sunday")
 mondays_sub<- subset(data8,Wday == "Monday")
@@ -208,48 +75,83 @@ thursdays_sub<- subset(data8,Wday == "Thursday")
 fridays_sub<- subset(data8,Wday == "Friday")
 saturdays_sub<- subset(data8,Wday == "Saturday")
 
-# convert values from character to numeric "double"
-sundays<-as.numeric(as.character(sundays_sub[,3]))
-# interpolate NA values
-sundays_interpolated<-na.interpolation(sundays,option = "linear")
-# replace old column with interpolation data
-sundays_sub[,3]<-sundays_interpolated
+#convert df to matrix where rows are number of points and columns are points
+# for each day
+mat_sunday <- matrix(sundays_sub$value,nrow = 96)
+mat_monday <- matrix(mondays_sub$value,nrow = 96)
+mat_tuesday <- matrix(tuesdays_sub$value,nrow = 96)
+mat_wednesday <- matrix(wednesdays_sub$value,nrow = 96)
+mat_thursday <- matrix(thursdays_sub$value,nrow = 96)
+mat_friday <- matrix(fridays_sub$value,nrow = 96)
+mat_saturday <- matrix(saturdays_sub$value,nrow = 96)
 
-mondays<-as.numeric(as.character(mondays_sub[,3]))
-mondays_interpolated<-na.interpolation(mondays,option = "linear")
-mondays_sub[,3]<-mondays_interpolated
+#initialize empty lists for each day
+allSundayPoints <- list()
+allMondayPoints <-list()
+allTuesdayPoints<- list()
+allWednesdayPoints<-list()
+allThursdayPoints<- list()
+allFridayPoints<- list()
+allSaturdayPoints<-list()
 
-tuesdays<-as.numeric(as.character(tuesdays_sub[,3]))
-tuesdays_interpolated<-na.interpolation(tuesdays,option = "linear")
-tuesdays_sub[,3]<-tuesdays_interpolated
+#fill na values using linear interpolation 
+for (i in 1:96)
+{
+  test1<-na.approx(mat_sunday[i,],rule=2)
+  test2<-na.approx(mat_monday[i,],rule=2)
+  test3<-na.approx(mat_tuesday[i,],rule=2)
+  test4<-na.approx(mat_wednesday[i,],rule=2)
+  test5<-na.approx(mat_thursday[i,],rule=2)
+  test6<-na.approx(mat_friday[i,],rule=2)
+  test7<-na.approx(mat_saturday[i,],rule=2)
+  allSundayPoints[[i]] <- test1
+  allMondayPoints[[i]] <- test2
+  allTuesdayPoints[[i]] <-test3
+  allWednesdayPoints[[i]]<-test4
+  allThursdayPoints[[i]]<- test5
+  allFridayPoints[[i]] <- test6
+  allSaturdayPoints[[i]]<-test7
+}
+#unlist matrix then transpose to get points for each day
+sun <- unlist(allSundayPoints)
+mon <- unlist(allMondayPoints)
+tues<-unlist(allTuesdayPoints)
+wed<- unlist(allWednesdayPoints)
+thur<- unlist(allThursdayPoints)
+fri<- unlist(allFridayPoints)
+sat<- unlist(allSaturdayPoints)
 
-wednesdays<-as.numeric(as.character(wednesdays_sub[,3]))
-wednesdays_interpolated<-na.interpolation(wednesdays,option = "linear")
-wednesdays_sub[,3]<-wednesdays_interpolated
+sun_interpolated<-matrix (sun, ncol = 96)
+mon_interpolated<-matrix (mon, ncol = 96)
+tues_interpolated<-matrix (tues, ncol = 96)
+wed_interpolated<-matrix (wed, ncol = 96)
+thur_interpolated<-matrix (thur, ncol = 96)
+fri_interpolated<-matrix (fri, ncol = 96)
+sat_interpolated<-matrix (sat, ncol = 96)
 
-thursdays<-as.numeric(as.character(thursdays_sub[,3]))
-thursdays_interpolated<-na.interpolation(thursdays,option = "linear")
-thursdays_sub[,3]<-thursdays_interpolated
+for (i in 1:74)
+{
+  write.table (sun_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  write.table (mon_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  write.table (tues_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  if (i <= 73){
+  write.table (wed_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  write.table (thur_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  write.table (fri_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  write.table (sat_interpolated[i,],"test.csv",append = TRUE,col.names = FALSE,row.names = FALSE)
+  }
+}
 
-fridays<-as.numeric(as.character(fridays_sub[,3]))
-fridays_interpolated<-na.interpolation(fridays,option = "linear")
-fridays_sub[,3]<-fridays_interpolated
+interpolated_values<-read.csv("test.csv",header = FALSE)
+date_time<-data8$datetime
+wday<- data8$Wday
+interpolated_values[2]<-date_time
+interpolated_values[3]<-wday
+colnames(interpolated_values)<- c("value","datetime","wday")
+write.csv(interpolated_values,"interpolated.csv")
+rownames(interpolated_values)<-interpolated_values$datetime
 
-saturdays<-as.numeric(as.character(saturdays_sub[,3]))
-saturdays_interpolated<-na.interpolation(saturdays,option = "linear")
-saturdays_sub[,3]<-saturdays_interpolated
-
-# concatenate each single day dataframes to form one dataframe 
-test<-rbind(mondays_sub,sundays_sub)
-test2<-rbind(test,tuesdays_sub)
-test3<-rbind(test2,wednesdays_sub)
-test4<-rbind(test3,thursdays_sub)
-test5<-rbind(test4,fridays_sub)
-test6<-rbind(test5,saturdays_sub)
-
-# sort dataframe by index to maintain original order
-st<-test6[order(test6$Index),]
-# rename column names
-setnames(st,old = c("Index","Index.1","data3","Wday"),new = c("Id","Date Time","Value","Day"))
-
-write.csv(st,"interpolated.csv")
+interpolated_values$value[]
+interpolated_tuesdays<- subset(interpolated_values, as.character(datetime) >="2017-01-10 00:00:00" & as.character(datetime) < "2017-01-11 00:00:00" )
+autoplot(ts(interpolated_tuesdays$value),ylab = "Mobile Throughput")
+axis(interpolated_tuesdays$datetime)
