@@ -29,7 +29,7 @@ for i in range (0,24):
         sum = sum + float(xy.value)
     list2.append(sum/5)
     sum = 0
-
+# test
 index = [i for i in (0,len(list2))]
 hourly = pd.DataFrame(list2)
 
