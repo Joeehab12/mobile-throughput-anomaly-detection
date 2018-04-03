@@ -3,7 +3,7 @@ import itertools
 import matplotlib.pyplot as plt
 import pandas as pd
 import statsmodels.api as sm
-
+import numpy as np
 from statsmodels.tsa.arima_model import ARIMA
 df = pd.read_csv('interpolated-detailed.csv')
 df.set_index('datetime')
@@ -76,21 +76,45 @@ def iterative_ARIMA_fit(series):
 #                                 enforce_stationarity=False,
 #                                 enforce_invertibility=False)
 
-mod = sm.tsa.ARIMA(subset,order = (7,0,2))
+mod = sm.tsa.ARIMA(subset,order = (1,0,2))
 
 results = mod.fit()
 
-ax = subset['2017-01-31 00:00:00':'2017-02-01 00:00:00'].plot(label='observed')
+ax = subset['2017-01-31 00:00:00':'2017-02-01 00:15:00']
+ax_plot = ax.plot(label='observed')
 results.fittedvalues['2017-02-01 00:00:00':'2017-02-05 00:00:00'].plot(label = "One-step ahead Forecast" ,alpha = 0.7)
 
-ax.set_xlabel('Datetime')
-ax.set_ylabel('Mobile Throughput')
+root_mean_squared_error = len(results.fittedvalues['2016-08-14 00:00:00':'2016-08-15 00:00:00'])
+ax_len =    len(ax['2017-01-31 00:00:00':'2017-02-01 00:00:00'])
+
+
+results.fittedvalues.index = [i for i in range(0,len(results.fittedvalues))]
+y = results.fittedvalues
+y.columns = ['value']
+y.index = [i for i in range(0,len(y))]
+y = np.asarray(y,dtype='float')
+
+x = [i for i in range(0,len(ax))]
+ax.index = x
+ax = np.asarray(ax,dtype='float')
+rmse = np.sqrt(((y[0:96] - ax[0:96])**2)).mean()
+
+ax_plot.set_xlabel('Datetime')
+ax_plot.set_ylabel('Mobile Throughput')
 plt.legend()
 plt.show()
 
+
+rmse_df = pd.DataFrame(rmse)
+rmse_df[0].plot()
+plt.show()
 
 
 results.plot_predict(start = pd.to_datetime("2017-02-01 23:45:00"),end = pd.to_datetime("2017-02-05 23:45:00"))
 plt.show()
 
-#test = sm.tsa.seasonal_decompose(subset.value,freq= 94,model = "additive")
+#subset.set_index('datetime')
+test = sm.tsa.seasonal_decompose(subset.values,freq= 94,model = "additive")
+
+test.plot()
+plt.show()
