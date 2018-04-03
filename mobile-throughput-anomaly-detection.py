@@ -9,7 +9,37 @@ df = pd.read_csv('interpolated-detailed.csv')
 df.set_index('datetime')
 subset = df[(df['datetime'] > "2016-08-14") & (df['datetime'] < "2016-12-31")]
 subset = df.iloc[:, 0:2]
-subset = subset.set_index("datetime")
+subset.set_index('datetime')
+
+
+print(subset['datetime'])
+
+sum = 0
+
+list2 = []
+for i in range (0,24):
+    if i < 10:
+        i = "0" + str(i)
+    for j in np.arange(0,60,15):
+        if j < 10:
+            j = "0" + str(j)
+        print('2016-08-14 ' + str(i) + ':' + str(j) + ':00')
+        xy = subset[(subset['datetime'] == '2016-08-14 ' + str(i) + ':' + str(j) + ':00')]
+        xy = xy.iloc[:, 0:1]
+        sum = sum + float(xy.value)
+    list2.append(sum/5)
+    sum = 0
+
+index = [i for i in (0,len(list2))]
+hourly = pd.DataFrame(list2)
+
+hourly.plot(label='hourly')
+plt.title('Hourly Data')
+plt.show()
+avg = (sum)/96
+
+print(avg)
+subset = subset.set_index('datetime')
 
 plt.style.use('fivethirtyeight')
 
@@ -25,6 +55,7 @@ seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))
 
 print('Examples of parameter combinations for Seasonal ARIMA...')
 print('SARIMAX: {} x {}'.format(pdq[1], seasonal_pdq[1]))
+print('SARIMAX: {} x {}'.format(pdq[1], seasonal_pdq[2]))
 print('SARIMAX: {} x {}'.format(pdq[1], seasonal_pdq[2]))
 print('SARIMAX: {} x {}'.format(pdq[2], seasonal_pdq[3]))
 print('SARIMAX: {} x {}'.format(pdq[2], seasonal_pdq[4]))
@@ -85,7 +116,7 @@ ax_plot = ax.plot(label='observed')
 results.fittedvalues['2017-02-01 00:00:00':'2017-02-05 00:00:00'].plot(label = "One-step ahead Forecast" ,alpha = 0.7)
 
 root_mean_squared_error = len(results.fittedvalues['2016-08-14 00:00:00':'2016-08-15 00:00:00'])
-ax_len =    len(ax['2017-01-31 00:00:00':'2017-02-01 00:00:00'])
+ax_len =  len(ax['2017-01-31 00:00:00':'2017-02-01 00:00:00'])
 
 
 results.fittedvalues.index = [i for i in range(0,len(results.fittedvalues))]
@@ -97,13 +128,12 @@ y = np.asarray(y,dtype='float')
 x = [i for i in range(0,len(ax))]
 ax.index = x
 ax = np.asarray(ax,dtype='float')
-rmse = np.sqrt(((y[0:96] - ax[0:96])**2)).mean()
+rmse = np.sqrt(((y[0:96] - ax[0:96])**2))
 
 ax_plot.set_xlabel('Datetime')
 ax_plot.set_ylabel('Mobile Throughput')
 plt.legend()
 plt.show()
-
 
 rmse_df = pd.DataFrame(rmse)
 rmse_df[0].plot()
