@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .Rapp.history
+.idea
 *.png
 *.csv
 # Session Data files
